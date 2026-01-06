@@ -34,12 +34,12 @@ Une application web moderne et intuitive pour gérer votre collection de livres,
 ## �️ Sthack Technique
 
 
-| **React** | Framework UI avec hooks modernes |
-| **Redux Toolkit** Gestion d'état prévisible et optimisée |
-| **Vite** | Build tool ultra-rapide avec HMR |
-| **CSS3** | Variables CSS, Grid, Flexbox, animations |
-| **LocalStorage** |  Persistance des données côté client |
-| **ESLint** | Qualité et cohérence du code |
+- **React** | Framework UI avec hooks modernes |
+- **Redux Toolkit** Gestion d'état prévisible et optimisée |
+- **Vite** | Build tool ultra-rapide avec HMR |
+- **CSS3** | Variables CSS, Grid, Flexbox, animations |
+- **LocalStorage** |  Persistance des données côté client |
+- **ESLint** | Qualité et cohérence du code |
 
 ### Architecture
 - **Pattern Redux** : Actions, reducers, store centralisé
