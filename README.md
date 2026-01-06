@@ -53,7 +53,7 @@ Une application web moderne et intuitive pour gérer votre collection de livres,
 
 ## 🏗️ Structure du Projet
 
-```
+
 src/
 ├── app/
 │   └── store.js              # Configuration Redux
@@ -68,7 +68,7 @@ src/
 ├── App.jsx                   # Composant principal
 ├── App.css                   # Styles globaux
 └── main.jsx                  # Point d'entrée
-```
+
 
 ## 🎯 Utilisation
 
