@@ -1,11 +1,47 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 
-// Thunk API
+// Simulation d'une API avec données locales
 export const fetchBooks = createAsyncThunk(
   'books/fetchBooks',
   async () => {
-    const res = await fetch('https://example.com/books')
-    return res.json()
+    // Simuler un délai d'API
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    
+    // Récupérer depuis localStorage ou retourner des données par défaut
+    const savedBooks = localStorage.getItem('books')
+    if (savedBooks) {
+      return JSON.parse(savedBooks)
+    }
+    
+    // Données par défaut
+    return [
+      {
+        id: 1,
+        title: "Clean Code",
+        author: "Robert C. Martin",
+        description: "Un guide pour écrire du code propre et maintenable",
+        category: "Programmation",
+        publishedYear: 2008,
+        isbn: "978-0132350884",
+        likes: 15,
+        rating: 4.5,
+        status: "lu",
+        dateAdded: new Date().toISOString()
+      },
+      {
+        id: 2,
+        title: "The Pragmatic Programmer",
+        author: "David Thomas, Andrew Hunt",
+        description: "Conseils pratiques pour devenir un meilleur programmeur",
+        category: "Programmation",
+        publishedYear: 1999,
+        isbn: "978-0201616224",
+        likes: 12,
+        rating: 4.8,
+        status: "à lire",
+        dateAdded: new Date().toISOString()
+      }
+    ]
   }
 )
 
@@ -14,14 +50,23 @@ const booksSlice = createSlice({
   initialState: {
     items: [],
     status: 'idle', // idle | loading | succeeded | failed
-    search: ''
+    search: '',
+    filter: 'all', // all | lu | en cours | à lire
+    sortBy: 'dateAdded', // title | author | dateAdded | rating
+    error: null
   },
   reducers: {
     addBook: (state, action) => {
-      state.items.push({
+      const newBook = {
         ...action.payload,
-        likes: 0
-      })
+        id: Date.now(),
+        likes: 0,
+        rating: 0,
+        dateAdded: new Date().toISOString()
+      }
+      state.items.unshift(newBook)
+      // Sauvegarder dans localStorage
+      localStorage.setItem('books', JSON.stringify(state.items))
     },
 
     editBook: (state, action) => {
@@ -31,8 +76,10 @@ const booksSlice = createSlice({
       if (index !== -1) {
         state.items[index] = {
           ...state.items[index],
-          ...action.payload
+          ...action.payload,
+          dateModified: new Date().toISOString()
         }
+        localStorage.setItem('books', JSON.stringify(state.items))
       }
     },
 
@@ -40,6 +87,7 @@ const booksSlice = createSlice({
       state.items = state.items.filter(
         book => book.id !== action.payload
       )
+      localStorage.setItem('books', JSON.stringify(state.items))
     },
 
     addLike: (state, action) => {
@@ -48,11 +96,42 @@ const booksSlice = createSlice({
       )
       if (book) {
         book.likes += 1
+        localStorage.setItem('books', JSON.stringify(state.items))
+      }
+    },
+
+    updateRating: (state, action) => {
+      const { id, rating } = action.payload
+      const book = state.items.find(book => book.id === id)
+      if (book) {
+        book.rating = rating
+        localStorage.setItem('books', JSON.stringify(state.items))
+      }
+    },
+
+    updateStatus: (state, action) => {
+      const { id, status } = action.payload
+      const book = state.items.find(book => book.id === id)
+      if (book) {
+        book.status = status
+        localStorage.setItem('books', JSON.stringify(state.items))
       }
     },
 
     setSearch: (state, action) => {
       state.search = action.payload
+    },
+
+    setFilter: (state, action) => {
+      state.filter = action.payload
+    },
+
+    setSortBy: (state, action) => {
+      state.sortBy = action.payload
+    },
+
+    clearError: (state) => {
+      state.error = null
     }
   },
 
@@ -60,13 +139,16 @@ const booksSlice = createSlice({
     builder
       .addCase(fetchBooks.pending, (state) => {
         state.status = 'loading'
+        state.error = null
       })
       .addCase(fetchBooks.fulfilled, (state, action) => {
         state.status = 'succeeded'
         state.items = action.payload
+        state.error = null
       })
-      .addCase(fetchBooks.rejected, (state) => {
+      .addCase(fetchBooks.rejected, (state, action) => {
         state.status = 'failed'
+        state.error = action.error.message || 'Erreur lors du chargement'
       })
   }
 })
@@ -76,7 +158,12 @@ export const {
   editBook,
   deleteBook,
   addLike,
-  setSearch
+  updateRating,
+  updateStatus,
+  setSearch,
+  setFilter,
+  setSortBy,
+  clearError
 } = booksSlice.actions
 
 export default booksSlice.reducer
